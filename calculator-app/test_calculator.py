@@ -37,5 +37,10 @@ class TestCalculator(unittest.TestCase):
         result: float = calculator('multiply',5,8)
         self.assertEqual(result,40)
 
+    def test_zero_division(self):
+        with self.assertRaises(ZeroDivisionError) as zero_ex:
+            calculator('div',0,0)
+        self.assertEqual(zero_ex.exception.args[0],'You can\'t divide by zero.')
+
 if __name__=='__main__':
     unittest.main()
