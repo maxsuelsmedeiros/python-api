@@ -26,12 +26,21 @@ purchase_orders: json = [
 #GET purchase_orders_items
 #POST purchase_orders_item
 
-@app.route('/')
+@app.route(rule='/')
 def home() -> str:
     return 'Hello Beautiful World!'
 
-@app.route('/purchase_orders')
+@app.route(rule='/purchase_orders')
 def get_purchase_orders() -> jsonify:
     return jsonify(purchase_orders)
+
+@app.route(rule='/purchase_orders/<int:id>')
+def get_purchase_orders_by_id(id) -> json|str:
+    for purchase_item in purchase_orders:
+        if purchase_item['id']==id:
+            return jsonify(purchase_item)
+    return jsonify({'message':'The ID passed:{} is not valid, review it and try again!'.format(id)})
+
+
 
 app.run(port=5000)
