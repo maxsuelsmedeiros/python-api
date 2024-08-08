@@ -1,5 +1,5 @@
 from flask import Flask , jsonify, request as flask_request
-from flask_restful import Api,Resource
+from flask_restful import Api
 import json
 import typing
 
@@ -7,26 +7,8 @@ import typing
 type json = json
 app=Flask(__name__)
 api=Api(app)
+from purchase_orders.resources import PurchaseOrders
 
-
-global purchase_orders 
-purchase_orders: json= [
-    {
-        'id':1,
-        'description':'purchase order 1',
-        'items':[
-            {'id':1,
-            'description': 'purchase order 1',
-            'price':20.99
-            }
-        ]
-
-    }
-]
-
-class PurchaseOrders(Resource):
-    def get(self) -> json:
-        return jsonify(purchase_orders)
 
 api.add_resource(PurchaseOrders,'/purchase_orders')
 
