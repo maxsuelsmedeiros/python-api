@@ -49,3 +49,11 @@ class PurchaseOrders(Resource):
         purchase_orders.append(purchase_order)
 
         return jsonify(purchase_order)
+    
+class PurchaseOrderById(Resource):
+
+    def get(self,id: int):
+        for purchase in purchase_orders:
+            if purchase['id'] == id:
+                return jsonify(purchase)
+        return jsonify({'message':'Id: "{}" not valid, inform a new one!'.format(id)})
