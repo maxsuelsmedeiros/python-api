@@ -1,32 +1,13 @@
 from flask import jsonify
 from flask_restful import Resource,reqparse
 from typing import Union, Dict, List,Any,Type
-
+from .model import PurchaseOrderModel
 
 JSON = Union[Dict[str, Any], List[Any], int, str, float, bool, Type[None]]
-global purchase_orders 
-purchase_orders: JSON= [
-    {
-        'id':1,
-        'description':'purchase order 1',
-        'items':[
-            {'id':1,
-            'description': 'purchase order 1',
-            'price':20.99
-            }
-        ]
 
-    }
-]
 
 class PurchaseOrders(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument(
-        'id',
-        type = int,
-        required = True,
-        help='Id not valid, inform a new one!'
-    )
 
     parser.add_argument(
         'description',
@@ -37,23 +18,20 @@ class PurchaseOrders(Resource):
 
 
     def get(self)-> JSON:
-        return jsonify(purchase_orders)
+        purchase_orders = PurchaseOrderModel.find_all()
+        return [p.as_dict() for p in purchase_orders]
     
     def post(self)-> JSON:
         data = PurchaseOrders.parser.parse_args()
-        purchase_order = {
-            'id': data['id'],
-            'description': data['description'],
-            'items': []
-        }
-        purchase_orders.append(purchase_order)
+        purchase_order = PurchaseOrderModel(**data)
+        purchase_order.save()
 
-        return jsonify(purchase_order)
+        return purchase_order.as_dict()
     
 class PurchaseOrderById(Resource):
 
     def get(self,id: int):
-        for purchase in purchase_orders:
-            if purchase['id'] == id:
-                return jsonify(purchase)
+        purchase_order = PurchaseOrderModel.find_by_id(id)
+        if purchase_order:
+            return purchase_order.as_dict()
         return jsonify({'message':'Id: "{}" not valid, inform a new one!'.format(id)})
