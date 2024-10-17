@@ -1,34 +1,12 @@
 from flask import jsonify
 from flask_restful import Resource,reqparse
-from typing import Union, Dict, List,Any,Type
-
-
-JSON = Union[Dict[str, Any], List[Any], int, str, float, bool, Type[None]]
-global purchase_orders 
-purchase_orders: JSON= [
-    {
-        'id':1,
-        'description':'purchase order 1',
-        'items':[
-            {'id':1,
-            'description': 'purchase order 1',
-            'price':20.99
-            }
-        ]
-
-    }
-]
+from typing import List,Dict
+from .model import PurchaseOrdemItemsModel
+from purchase_orders.model import PurchaseOrderModel 
 
 class PurchaseOrdersItems(Resource):
 
     parser = reqparse.RequestParser()
-
-    parser.add_argument(
-        'id',
-        type = int,
-        required = True,
-        help = 'Inform a valid ID!'
-    )
 
     parser.add_argument(
         'description',
@@ -44,23 +22,16 @@ class PurchaseOrdersItems(Resource):
         help = 'Inform a valid price!'
     )
 
-    def get(self,id):
-        for purchase in purchase_orders:
-            if purchase['id'] == id:
-                return jsonify(purchase['items'])
-        return jsonify({'message':'Id number {} not found! Try other one!'.format(id)})
+    def get(self,id)-> List[Dict]:
+        purchase_order_item = PurchaseOrdemItemsModel.find_by_purchase_order_id(id)
+        return [p.as_dict() for p in purchase_order_item]
     
     def post(self,id):
-        data = PurchaseOrdersItems.parser.parse_args()
-
-        for purchase in purchase_orders:
-            if purchase['id'] == id:
-                purchase['items'].append(
-                    {
-                        'id': data['id'],
-                        'description': data['description'],
-                        'price': data['price']
-                    }
-                )
-                return jsonify(purchase)
+        purchase_order = PurchaseOrderModel.find_by_id(id)
+        if purchase_order:
+            data = PurchaseOrdersItems.parser.parse_args()
+            data['purchase_order_id'] = id
+            purchase_orders_item = PurchaseOrdemItemsModel(**data)
+            purchase_orders_item.save()
+            return purchase_orders_item.as_dict()
         return jsonify({'message':'Id number {} not found! Try other one!'.format(id)})
