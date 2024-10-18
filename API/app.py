@@ -1,5 +1,6 @@
 from flask import Flask , jsonify, request as flask_request
 from flask_restful import Api
+from flask_migrate import Migrate
 import json
 import typing
 from purchase_orders.resources import PurchaseOrders
@@ -8,13 +9,18 @@ from purchase_orders_items.resources import PurchaseOrdersItems
 from db import db
 
 
-def create_app() -> Flask:#defining the Json typei
+def create_app(env) -> Flask:#defining the Json typei
     app=Flask(import_name=__name__)
     api=Api(app=app)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:max123@localhost:5432/python_api'
+    database = 'python_api'
+    if env == 'testing':
+        database = 'python_api_test'
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:max123@localhost:5432/{}'.format(database)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
+    Migrate(app,db)
 
     @app.before_request
     def create_tables():
@@ -25,3 +31,5 @@ def create_app() -> Flask:#defining the Json typei
     api.add_resource(PurchaseOrderById,'/purchase_orders/<int:id>')
     api.add_resource(PurchaseOrdersItems,'/purchase_orders/<int:id>/items')
     return app
+
+app=create_app('testing')
