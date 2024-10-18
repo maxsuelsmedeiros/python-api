@@ -23,8 +23,11 @@ class PurchaseOrdersItems(Resource):
     )
 
     def get(self,id)-> List[Dict]:
-        purchase_order_item = PurchaseOrdemItemsModel.find_by_purchase_order_id(id)
-        return [p.as_dict() for p in purchase_order_item]
+        purchase_order = PurchaseOrderModel.find_by_id(id)
+        if purchase_order:
+            purchase_order_item = PurchaseOrdemItemsModel.find_by_purchase_order_id(id)
+            return [p.as_dict() for p in purchase_order_item]
+        return jsonify({'message':'Id number {} not found! Try other one!'.format(id)})
     
     def post(self,id):
         purchase_order = PurchaseOrderModel.find_by_id(id)
